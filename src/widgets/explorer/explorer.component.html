@@ -1,0 +1,121 @@
+<style>
+  .explorer-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 400px;
+    background-color: #ececec;
+    padding: 10px;
+  }
+
+  .explorer-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: fit-content;
+    padding: 5px;
+    margin-bottom: 5px;
+    background-color: #fff;
+  }
+
+  .explorer-header > button {
+    margin: 0 10px;
+  }
+
+  .explorer-path {
+    flex: 1;
+  }
+
+  .explorer-search {
+    flex: 0.25;
+    min-width: 150px;
+    max-width: 250px;
+    margin-left: 10px;
+  }
+
+  .explorer-content {
+    flex: 1;
+    overflow-y: scroll;
+    background-color: #fff;
+  }
+
+  .explorer-row {
+    cursor: pointer;
+  }
+
+  .explorer-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .explorer-item > span {
+    margin-left: 10px;
+  }
+</style>
+<div class="explorer-container">
+  <div class="explorer-header">
+    <button
+      nz-button
+      nzType="primary"
+      nzShape="circle"
+      nzSize="small"
+      (click)="goBack()"
+      [disabled]="path === ''"
+    >
+      <i nz-icon nzType="left" nzTheme="outline"></i>
+    </button>
+    <ng-template #goToButton>
+      <button nz-button nzType="primary" nzSearch (click)="goToPath()"><i nz-icon nzType="arrow-right" nzTheme="outline"></i></button>
+    </ng-template>
+    <nz-input-group nzSearch [nzAddOnAfter]="goToButton" class="explorer-path">
+      <input type="text" nz-input placeholder="/" [(ngModel)]="path" />
+    </nz-input-group>
+    <div class="explorer-search">
+      <input placeholder="Search..." nz-input [(ngModel)]="search" [nzAutocomplete]="auto" />
+      <nz-autocomplete #auto>
+        <nz-auto-option
+          *ngFor="let node of searchResult"
+          [nzValue]="node"
+          [nzLabel]="node.segment"
+          (click)="searchSelect(node)"
+        >
+          {{ node.segment }} ({{ node.path }})
+        </nz-auto-option>
+      </nz-autocomplete>
+    </div>
+  </div>
+
+  <div class="explorer-content">
+    <nz-table [nzData]="['']" nzTableLayout="fixed" [nzFrontPagination]="false">
+      <thead (nzSortChange)="sort($event)" nzSingleSort>
+      <tr>
+        <th
+          *ngFor="let column of listOfColumn"
+          nzShowSort
+          [nzSortKey]="column.key"
+        >
+          {{ column.title }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr
+        *ngFor="let node of folder"
+        (dblclick)="itemSelect(node)"
+        class="explorer-row"
+      >
+        <td>
+          <div class="explorer-item">
+            <i *ngIf="node.type === 'folder'" nz-icon nzType="folder" nzTheme="outline"></i>
+            <i *ngIf="node.type === 'file'" nz-icon nzType="file" nzTheme="outline"></i>
+            <span>{{node.segment}}</span>
+          </div>
+        </td>
+        <td>{{ node.type }}</td>
+        <td>{{ node.modificationDate ? node.modificationDate.format('YYYY-MM-DD') : '' }}</td>
+        <td>{{ node.size ? node.size + ' MB' : ''}}</td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
